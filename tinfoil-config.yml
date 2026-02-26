@@ -1,0 +1,48 @@
+shim-version: v0.3.12@sha256:b81f2295ae6750d61e94f810ce24077360001b6ec795d13643f3170df29e304d
+cvm-version: 0.6.7
+cpus: 16
+memory: 65536
+
+containers:
+  - name: "gcsfuse"
+    image: "kapetacom/gcsfuse-ubuntu:v3.2.0"
+    cap_add:
+      - SYS_ADMIN
+    devices:
+      - /dev/fuse
+    security_opt:
+      - apparmor=unconfined
+    volumes:
+      - /mnt/ramdisk/gcs-bucket:/gcs:rshared
+      - /mnt/ramdisk/gcloud_key.json:/key.json:ro
+    env:
+      - BUCKET_NAME: "pollux-enc-prod"
+
+  - name: "sync"
+    image: "us-central1-docker.pkg.dev/workshop-labs-pbc/pollux-docker/cpu@sha256:7e14bbab638961f0f13ce8a5968a5a9e9b2321b6985f577dd572449a4d2bbf03"
+    volumes:
+      - /mnt/ramdisk/gcs-bucket:/mnt/gcs
+      - /mnt/ramdisk/gcloud_key.json:/key.json:ro
+    env:
+      - GOOGLE_APPLICATION_CREDENTIALS: "/key.json"
+      - GCS_BUCKET: "pollux-enc-prod"
+      - GCS_ACCESS: "read-only"
+      - POLLUX_LN_GCS_BUCKET: "gs://pollux-enc-prod"
+      - POLLUX_GCSFUSE_MOUNT_PATH: "/mnt/gcs"
+      - KEY_MODE: "real_keys"
+      - LOG_LEVEL: "INFO"
+    secrets:
+      - DATABASE_URL
+      - GOOGLE_CLIENT_ID
+      - GOOGLE_CLIENT_SECRET
+      - INTERNAL_SERVICE_SECRET
+
+shim:
+  listen-port: 443
+  upstream-port: 8000
+  publish-attestation: true
+  tls-challenge: dns
+  paths:
+    - /ping
+    - /set_dek
+    - /v1/user/*
