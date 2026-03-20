@@ -18,7 +18,7 @@ containers:
       - BUCKET_NAME: "pollux-enc-prod"
 
   - name: "sync"
-    image: "us-central1-docker.pkg.dev/workshop-labs-pbc/pollux-docker/cpu@sha256:a0316ffbb5eec885435fcac696e7fc5176f2821d232e972cdb8bd09cfa8bc665"
+    image: "us-central1-docker.pkg.dev/workshop-labs-pbc/pollux-docker/cpu@sha256:d5a452aa55a5528eb78544af3c6fdefda8af5503dba302f9eb021b09d89cb316"
     volumes:
       - /mnt/ramdisk/gcs-bucket:/mnt/gcs
       - /mnt/ramdisk/gcloud_key.json:/key.json:ro
